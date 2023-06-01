@@ -1,5 +1,3 @@
-import app
-
 # sql queries for task groups
 CREATE_TASK_GROUP = "INSERT INTO `task_groups` (`group_name`) VALUES (%s);"
 GET_ALL_TASK_GROUPS = "SELECT * FROM `task_groups`;"
