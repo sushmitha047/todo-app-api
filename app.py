@@ -1,18 +1,7 @@
 from flask import Flask, request, make_response, jsonify
-import pymysql.cursors
 import datetime
 from sql_queries import *
-
-
-
-# Connect to the database
-connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='12345#47',
-                             db='app_test',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
-
+from db_connection import *
 
 app = Flask(__name__)
 
