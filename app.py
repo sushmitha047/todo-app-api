@@ -1,5 +1,6 @@
 from flask import Flask, request, make_response, jsonify
 import pymysql.cursors
+import datetime
 
 
 
@@ -23,7 +24,7 @@ def test():
 
 # create task groups
 @app.route('/task-groups', methods=['POST'])
-def task_groups():
+def create_task_groups():
     data = request.get_json()
     group_name=data['group_name']
     if group_name == '':
@@ -102,6 +103,39 @@ def delete_task_group(group_name):
         error_message = 'Error deleting task group: ' + str(e)
         print("Exception: ", error_message)
         return make_response(jsonify({'message': error_message}), 500)
+
+# create tasks
+@app.route('/task-groups/<int:task_groupid>/tasks', methods=['POST'])
+def create_tasks(task_groupid):
+    data = request.get_json()
+    task_name = data['task_name']
+    description = data['description']
+    due_date = data['due_date']
+    status = 'added'
+
+    if task_name == '' and due_date == '':
+        return make_response(jsonify({'message': 'Task name and due date cannot be empty'}))
+
+    due_date_datetime = datetime.datetime.strptime(due_date, '%Y/%m/%d').date()
+    current_date = datetime.datetime.now().date()
+
+    # print(current_date)
+
+    if due_date_datetime < current_date:
+        return make_response(jsonify({'message': 'Due date must be in the future'}), 400)
+    
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO `tasks` (`task_name`, `description`, `due_date`, `status`, `task_groupid`) VALUES (%s, %s, %s, %s, %s);"
+            cursor.execute(sql, (task_name, description, due_date, status, task_groupid))
+            connection.commit()
+            return make_response(jsonify({'message': f'task {task_name} created successfully'}), 200)
+    except Exception as e:
+        error_message = f'Error creating task {task_name}: ' + str(e)
+        print("Exception:", error_message)
+        return make_response(jsonify({'message': error_message}), 500)
+
+
 
 
 if __name__ == '__main__':
