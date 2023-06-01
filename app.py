@@ -88,14 +88,22 @@ def update_task_group(id):
 
 
 # delete a task-group
-@app.route('/task-groups/<string:group_name>', methods=['DELETE'])
-def delete_task_group(group_name):
+@app.route('/task-groups/<int:id>', methods=['DELETE'])
+def delete_task_group(id):
     try:
         with connection.cursor() as cursor:
             # data =request.get_json()
             # group_name = data['group_name']
-            sql = "DELETE from `task_groups` WHERE `group_name`=%s"
-            cursor.execute(sql, (group_name))
+            sql_fetch_tasks = "SELECT * FROM `tasks` WHERE `task_groupid`=%s;"
+            cursor.execute(sql_fetch_tasks, (id))
+            tasks = cursor.fetchall()
+
+            for task in tasks:
+                if task['status'] != 'completed':
+                    return make_response(jsonify({'message': 'Cannot delete task group with incomplete tasks'}), 400)
+            
+            sql = "DELETE from `task_groups` WHERE `id`=%s"
+            cursor.execute(sql, (id))
             connection.commit()
             return make_response(jsonify({'message': 'task group deleted successfully'}), 200)
     except Exception as e:
@@ -225,7 +233,7 @@ def delete_task():
             result = cursor.fetchall()
 
             if len(result) == 0:
-                return make_response(jsonify({'message': 'Tasks not found'}), 404)
+                return make_response(jsonify({'message': 'No completed tasks not found'}), 404)
             else:
                 for res in result:
                     print(res)
