@@ -177,96 +177,6 @@ def get_task(id):
         error_message = 'Error getting the task: ' + str(e)
         print("Exception:", error_message)
         return make_response(jsonify(error_message), 500)
-    
-# # update task name
-# @app.route('/task/<string:task_name>', methods=['PUT'])
-# def update_task_name(task_name):
-#     # print("What do you wish to update?")
-#     # print("1. Task name")
-#     # print("2. Task description")
-#     # print("3. Task due date")
-#     # print("4. Priority")
-#     # print("5. Task status")
-#     # print("6. Update all fields")
-
-#     # choice = input("Enter your choice")
-
-#     try:
-#         with connection.cursor() as cursor:
-#             data = request.get_json()
-#             new_task_name = data['task_name']
-#             sql = "UPDATE `tasks` SET `task_name`=%s WHERE `task_name`=%s;"
-#             cursor.execute(sql, (new_task_name, task_name))
-#             connection.commit()
-#             return make_response(jsonify({'message': 'task name updated successfully'}), 200)
-#     except Exception as e:
-#         error_message = 'Error updating task name: ' + str(e)
-#         print("Exception: ", error_message)
-#         return make_response(jsonify(error_message), 500)
-    
-# # update task description
-# @app.route('/task/<int:id>', methods=['PUT'])
-# def update_task_desc(id):
-#     try:
-#         with connection.cursor() as cursor:
-#             data = request.get_json()
-#             description = data['description']
-#             sql = "UPDATE `tasks` SET `description`=%s WHERE `id`=%s;"
-#             cursor.execute(sql, (description, id))
-#             connection.commit()
-#             return make_response(jsonify({'message': 'task description updated successfulyy'}), 200)
-#     except Exception as e:
-#         error_message = 'Error updating task description: ' + str(e)
-#         print("Exception: ", error_message)
-#         return make_response(jsonify(error_message), 500)
-    
-# # update task due_date
-# @app.route('/task/<int:id>', methods=["PUT"])
-# def update_task_duedate(id):
-#     try:
-#         with connection.cursor() as cursor:
-#             data = request.get_json()
-#             due_date = data['due_date']
-#             sql = "UPDATE `tasks` SET `due_date`=%s WHERE `id`=%s;"
-#             cursor.execute(sql, (due_date, id))
-#             connection.commit()
-#             return make_response(jsonify({'message': 'task due_date updated successfully'}), 200)
-#     except Exception as e:
-#         error_message = 'Error updating task due_date: ' + str(e)
-#         print("Exception: ", error_message)
-#         return make_response(jsonify(error_message), 500)
-    
-# # update task priority
-# @app.route('/task/<int:id>', methods=["PUT"])
-# def update_task_priority(id):
-#     try:
-#         with connection.cursor() as cursor:
-#             data = request.get_json()
-#             priority = data['priority']
-#             sql = "UPDATE `tasks` SET `priority`=%s WHERE `id`=%s;"
-#             cursor.execute(sql, (priority, id))
-#             connection.commit()
-#             return make_response(jsonify({'message': 'task priority updated successfully'}), 200)
-#     except Exception as e:
-#         error_message = 'Error updating task priority: ' + str(e)
-#         print("Exception: ", error_message)
-#         return make_response(jsonify(error_message), 500)
-
-# # update task status
-# @app.route('/task/<int:id>', methods=["PUT"])
-# def update_task_status(id):
-#     try:
-#         with connection.cursor() as cursor:
-#             data = request.get_json()
-#             status = data['status']
-#             sql = "UPDATE `tasks` SET `status`=%s WHERE `id`=%s;"
-#             cursor.execute(sql, (status, id))
-#             connection.commit()
-#             return make_response(jsonify({'message': 'task status updated successfully'}), 200)
-#     except Exception as e:
-#         error_message = 'Error updating task status: ' + str(e)
-#         print("Exception: ", error_message)
-#         return make_response(jsonify(error_message), 500)
 
 # update task information
 @app.route('/tasks/<int:id>', methods=['PUT'])
@@ -304,6 +214,47 @@ def update_task(id):
         error_message = 'Error updating task status: ' + str(e)
         print("Exception: ", error_message)
         return make_response(jsonify({'message': error_message}), 500)
+    
+# delete completed tasks
+@app.route('/tasks', methods=['DELETE'])
+def delete_task():
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `tasks` WHERE `status`='completed';"
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            if len(result) == 0:
+                return make_response(jsonify({'message': 'Tasks not found'}), 404)
+            else:
+                for res in result:
+                    print(res)
+                    sql = "DELETE from `tasks` WHERE `status`=%s"
+                    cursor.execute(sql, (res['status']))
+                    connection.commit()
+                    return make_response(jsonify({'message': 'Deleted completed tasks successfuly'}))
+    except Exception as e:
+        error_message = 'Error deleting completed tasks: ' + str(e)
+        print("Exception: ", error_message)
+        return make_response(jsonify(error_message))
+
+# delete task by id
+@app.route('/tasks/<int:id>', methods=['DELETE'])
+def delete_task_by_id(id):
+    try:
+        with connection.cursor() as cursor:
+            sql = "DELETE from `tasks` WHERE `id`=%s;"
+            cursor.execute(sql, (id))
+            connection.commit()
+            return make_response(jsonify({'message': 'Deleted task successfully'}))
+    except Exception as e:
+        error_message = 'Error deleting the task: ' + str(e)
+        print("Exception: ", error_message)
+        return make_response(jsonify(error_message))
+
+
+
+
 
 
                 
